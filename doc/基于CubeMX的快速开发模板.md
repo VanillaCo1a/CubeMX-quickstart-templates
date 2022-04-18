@@ -1,266 +1,800 @@
-# 基于CubeMX创建快速开发模板
+# 创建基于CubeMX的快速开发模板
 
 ## 写在前面
 
-前面我们介绍了以下几个方法：
+前面我们介绍了以下几种创建模板的方式：
 
-1.  *基于ARMCC工具链，配置CubeMX生成MDK工程；*
+1.  **对于ARMCC工具链，配置CubeMX生成MDK工程模板，使用Keil5MDK
+    IDE（以下简称MDK）进行开发的方法；**
 
-2.  *由VSCode-EIDE插件（以下简称EIDE）导入MDK工程，并创建EIDE项目，从而替代Keil5MDK
-    IDE（以下简称MDK）进行开发的方法；*
+2.  **对于ARMCC工具链，将配置CubeMX生成的MDK工程模板，导入至VSCode-EIDE编辑器-构建插件（以下简称EIDE），并创建EIDE项目模板，从而替代MDK进行开发的方法；**
 
-3.  *基于GCC工具链，配置CubeMX生成Makefile文件，并创建EIDE项目的方法*
+3.  **对于GCC工具链，配置CubeMX生成Makefile文件，并创建EIDE项目模板进行开发的方法；**
 
-*（这三种方法以下简称方法1,2,3）*
+**（以下简称为[ARMCC-MDK模板]方式1，[ARMCC-EIDE模板]方式2，[GCC-EIDE模板]方式3）**
 
-以下，我们围绕前面涉及的一系列工具——一个代码生成器，两种IDE以及对应的两条编译工具链，探讨由这三种方式创建工程的优劣，以期得到一个全面的基于stm32hal库快速开发工程模板。
+以下，我们围绕前面涉及的一系列工具——一个代码生成器，两种IDE及对应的两条工具链，探讨由这三种方式创建模板的优劣，以期得到一个快速开发模板。
 
-## 创建模板的流程
+*关于创建模板和使用模板的具体步骤，请看第五到八节。*
+
+## 创建模板流程分析
 
 试回顾创建一个模板的流程，不论基于stm32标准库还是HAL库，使用MDK还是EIDE，这个流程都是相似的：
 
-1.  *新建一个文件夹作为工程目录/工作区，根据需要修改其名称；*
+1.  **新建一个文件夹作为模板文件夹，根据需要修改其名称；**
 
-2.  *将官方提供的库文件、用户文件和CMSIS文件等复制到文件夹内，可以选择复制完整的库相关文件或是仅复制需要的库相关文件；*
+2.  **将官方提供的库文件、用户文件和CMSIS文件等复制到文件夹内，可以选择复制完整的库相关文件或是仅复制需要的库相关文件；**
 
-3.  *在IDE内新建工程/项目，在工程/项目内配置库相关文件目录和头文件路径；*
+3.  **在IDE内创建工程/项目模板，并配置库相关文件目录和头文件路径；**
 
-4.  *配置其它工程/项目选项，包括芯片型号，输出选项，预置宏定义，编译选项，下载与调试配置等；*
+4.  **配置模板的其它选项，包括芯片型号，输出选项，预置宏定义，编译选项，下载与调试配置等；**
 
-*End. 进行后续用户开发……*
+    **End. 进行后续用户开发...**
 
-由于在开发的过程中需求是随时变化的，我们倾向于将完整的库相关文件复制到文件夹内，并根据需求在工程/项目内随时对目录增删。这样一来，我们就需要在后续开发中重复上述步骤3。
+由于在开发的过程中需求是随时变化的，我们倾向于将完整的库相关文件复制到模板文件夹内，并根据需求在模板内随时修改目录结构。这样一来，我们就需要在后续开发中重复步骤3。
 
-对于需要灵活使用hal库+ll库，从而一定程度上兼顾快速与性能的开发场景，其库文件数量大，重复步骤3对目录的增删难免繁琐和冗余。特别是就目前而言(2022.3.8)，MDK工程与EIDE项目都不支持在图形界面内对目录批量删除文件。
+对于需要灵活使用hal库+ll库，从而一定程度兼顾快速和性能的开发场景，其库文件数量大，重复步骤3修改目录结构难免繁琐、冗余。特别是就目前而言(2022.3)，MDK工程与EIDE项目都不支持在图形界面内对目录进行批量修改。
 
-通过配置CubeMX生成工程，可以在生成代码的同时自动化地对目录增删，从而免于在开发过程中重复上述步骤3，提高开发效率。因此，基于CubeMX创建工程模板，是本文所探讨的快速开发的重点。
+通过配置CubeMX生成工程，可以在生成代码的同时自动化地修改目录结构，从而免于在开发过程中重复操作，提高开发效率。因此，基于CubeMX直接或间接创建模板，是本文所探讨的快速开发的重点。
 
-*使用CubeMX生成工程还有一个好处——可以选择不为每个文件夹都复制完整的库相关文件，只需确保开发环境中有CubeMX及相应库文件，剩下交给生成器即可——手动创建模板则需要考虑复制完整的库文件以减少工作量。另外，减小文件夹大小对于版本管理和协作开发都更有利。*
+*使用CubeMX生成工程还有一个好处——可以选择不为每个文件夹都复制完整的库相关文件，只需确保开发环境中有CubeMX及相应库文件，剩下交给生成器即可——手动创建模板则需要考虑复制完整的库文件以减少工作量。另外，减小文件夹大小对于版本管理和协作开发都更有利*
 
-## CubeMX生成工程的文件结构
+## 模板文件结构分析
 
 ![](media/f500e7d07ea0a5654e019b023985e2f9.png)
 
 用到的工具链
 
-观察CubeMX生成的MDK工程和Makefile文件，如下
+### CubeMX生成文件的结构
+
+观察CubeMX生成的MDK工程和Makefile文件如下：
 
 ![](media/5a00a89cd441544bd6942a79f8f5d47f.png)![](media/76b2b220fd62b806717de8647579f48b.png)
 
 ![](media/0b9095ec97880aca4e9c0d755a1343e3.png)
 
-可以看到，MDK工程存放在MDK-ARM文件夹下，包含ARMCC工具链相应的引导文件。而Makefile生成的文件则存放在工程根目录，包含相应引导文件和链接脚本等。
+可以看到，MDK工程存放在MDK-ARM文件夹下，包含MDK工程文件和ARMCC工具链对应的startup_xxx.s引导文件。而Makefile生成的文件则存放在工程根目录，包含Makefile文件、GCC对应的引导文件和链接脚本。
 
-不同工具链生成的库相关文件是相同的，Drivers文件夹存放库文件和CMSIS文件，Core文件夹存放用户文件。
+不同工具链生成的库相关文件是相同的，它们存放在Core和Drivers两个文件夹。Drivers文件夹存放库文件和CMSIS文件，Core文件夹存放用户文件。
 
 ![](media/01bbac56014cb2cfcb24ac224a590d57.png)
 
 当在CubeMX中选中“复制全部库文件”时，CubeMX会在生成工程时将给定型号的所有库文件和CMSIS文件复制到Drivers文件夹下，大小约为几百M。
 
-而当选中“仅复制必要库文件”时，CubeMX会在生成工程时仅复制需要的库文件和CMSIS文件。*需要注意的是，此时CubeMX会删除多余的库文件，但不会完全删除多余的CMSIS文件，如果使用EIDE建立工程则需要格外留意（详见后文）*。
+而当选中“仅复制必要库文件”时，CubeMX会在生成工程时仅复制需要的库文件和CMSIS文件。*如果此前曾选中“复制全部库文件”选项生成工程，那么这时CubeMX会删除多余的库文件，但不会完全删除多余的CMSIS文件，如果使用EIDE创建项目则需要格外留意（详见本节EIDE项目的目录结构）*。
 
-Drivers文件夹内的库文件和CMSIS文件或被全部复制，或根据需要被复制；Core文件夹内的用户文件则往往是对库文件的调用实例，总是随用户开发而变化。
+Drivers文件夹内的库文件和CMSIS文件根据以上选项被全部复制或据需被部分复制；Core文件夹内的用户文件则往往是对库文件的调用实例，随用户开发情况而增减。
 
-![](media/38d2db98ba402029d655a9fb520c6d72.png)
+### MDK工程的目录结构
 
-CubeMX生成的MDK工程也采用与文件结构相近的工程目录：库文件和CMSIS文件被添加在Drivers的子目录下，用户文件和.s引导文件被添加在Application的子目录下。
+![](media/a27fcad9683228dd30fe8e483698511b.png)
 
-![](media/d75655a6ab7362702cd1c79a8638176a.png)
-![](media/077a80f4207074419a6323d4c8e7e1f0.png)
+CubeMX生成的MDK工程也采用与文件结构相近的目录结构：库文件和CMSIS文件被添加在Drivers的子目录下，用户文件和.s引导文件被添加在Application的子目录下。
 
-使用EIDE创建项目并配置项目目录时，可以沿用这样的工程目录。
+### EIDE项目的目录结构
 
-对于方法2，在从MDK导入工程时能自动配置工程目录；
+![](media/d79a4e81f8761e7b41ac7ca337cd0b83.png)
+![](media/d09115c373b2cf1bf1d3f192e4707d63.png)
 
-对于方法3，将Core文件夹和Drivers文件夹添加为EIDE特有的“普通文件夹”，使项目目录与文件结构保持同步，配合CubeMX的“仅复制必要库文件”选项，同样可以略过手动添加文件的步骤。注意若选择过“复制全部库文件”选项，则需要删除多余的CMSIS文件，再切换为“仅复制必要库文件”选项生成代码，否则将因为引入多余的头文件而报错。
+使用EIDE创建项目并配置目录结构时，可以沿用MDK的目录结构：
 
-## 创建快速开发模板的流程
+对于方法2，在从MDK导入工程时会自动修改工程目录；
 
-总结前面几个部分，我们可以得到基于CubeMX创建快速开发模板的流程：
+对于方法3，将Core文件夹和Drivers文件夹添加为EIDE特有的“普通文件夹”，使项目目录与文件结构保持同步，配合CubeMX的“仅复制必要库文件”选项，同样可以略过手动添加文件的步骤。注意若选择过“复制全部库文件”选项，则需要删除CMSIS文件夹，再切换为“仅复制必要库文件”选项生成代码，否则将会因为引入多余的头文件而报错。
 
-1.  **新建一个文件夹作为工程目录/工作区，根据需要修改其名称；**
+## 模板配置文件分析
 
-2.  **配置CubeMX生成Makefile文件，并创建基于GCC的EIDE项目（方法3）；**
+### MDK工程配置文件分析
 
-3.  **配置CubeMX生成MDK工程（方法1）；**
+用CubeMX任意生成一个MDK工程，复制一份为副本，然后打开工程后关闭工程
 
-4.  **由EIDE导入MDK工程，并创建基于ARMCC的EIDE项目（方法2）；**
+![](media/ed3ba9d9e1b7e9fcc00c49dc3f9033f9.png)
 
-5.  **配置各个工程/项目的其它选项；**
+在VSCode中打开.uvprojx和.uvoptx文件，进行文本对比
 
-**End. 进行后续用户开发……**
+![](media/4570aeca4cd52bc1224207d3d30b71fc.png)
+
+![](media/6b2ea68cf2a22cfa793b6add60da766c.png)
+
+可以看到，工程文件实际为XML文本。在首次打开工程时，MDK会对所有没有关闭的标签进行填充和关闭，例如对内存布局的地址填充（猜测这是通过CubeMX提供的芯片型号自动补全的）等。MDK还可能额外添加一些标签。对于一个模板，应使其尽可能保持未被初始化的状态，因此这里应尝试在未被开启的工程文件上修改配置。
+
+这里附上经过比对，一些需要修改的标签及在MDK内对应的选项：
+
+*.uvoptx文件在开启后缩进格式会由换行符变为2个空格，在文本对比前需要先对缩进格式进行统一*
+
+```xml
+Template.uvprojx: 
+<Project>
+  <Targets>
+    <Target>
+      <uAC6>1</uAC6>					Target - ARM Compiler
+      <TargetOption>
+        <TargetCommonOption>
+          <OutputDirectory>				Output - Select Folder for Objects
+          <OutputName>					Output - Name of Executable
+          <ListingPath>					Listing - Select Folder for Listings
+        </TargetCommonOption>
+        <TargetArmAds>
+          <ArmAdsMisc>
+            <useUlib>					Target - Use MicroLIB
+          </ArmAdsMisc>
+          <Cads>
+            <interw>					C/C++ - 
+            <Optim>						C/C++ - Optimization
+            <oTime>						C/C++ - Optimize for Time
+            <SplitLS>					C/C++ - Split Load and Store Multiple
+            <OneElfS>					C/C++ - One ELF Section per Function
+            <Strict>					C/C++ - Strict ANSI C
+            <EnumInt>					C/C++ - Enum Container always int
+            <PlainCh>					C/C++ - Plain Char is Signed
+            <Ropi>						C/C++ - Read-Only Position Independent
+            <Rwpi>						C/C++ - Read-Write Position Independent
+            <wLevel>					C/C++ - Warnings
+            <uThumb>					C/C++ - Thumb Mode
+            <uSurpInc>					C/C++ - No Auto Includes
+            <uC99>						C/C++ - C99 Mode
+            <uGnu>						C/C++ - GNU extensions
+            <useXO>						C/C++ - Execute-only Code
+            <v6Lang>					C/C++ - Language C
+            <v6LangP>					C/C++ - Language C++
+            <vShortEn>					C/C++ - Short enums/wchar
+            <vShortWch>					C/C++ - Short enums/wchar
+            <v6Lto>						C/C++ - Link-Time Optimization
+            <v6WtE>						C/C++ - Turn Warnings into Errors
+            <v6Rtti>					C/C++ - use RTTI
+          </Cads>
+        </TargetArmAds>
+      </TargetOption>
+    </Target>
+  </Targets>
+</Project>
+
+Template.uvoptx: 
+<ProjectOpt>
+    <Target>
+        <TargetOption>
+            <OPTLEX>
+                <ListingPath>			Listing - Select Folder for Listings
+            </OPTLEX>
+            <DebugOpt>
+                <nTsel>					Debug – Use:
+                <pMon>					Debug – Use:
+            </DebugOpt>
+            <TargetDriverDllRegistry>	Debug – Settings – Debug & Trace & Flash Download
+                <SetRegEntry>
+                    <Number></Number>
+                    <Key></Key>
+                    <Name></Name>
+                </SetRegEntry>
+            </TargetDriverDllRegistry>
+            <DebugDescription>			Debug – Settings – Pack
+                <Enable></Enable>
+                <EnableFlashSeq></EnableFlashSeq>
+                <EnableLog></EnableLog>
+                <Protocol></Protocol>
+                <DbgClock></DbgClock>
+            </DebugDescription>
+        </TargetOption>
+</Target>
+</ProjectOpt>
+```
+
+除.uvoptx文件的标签\<ProjectOpt\>\<Target\>\<TargetOption\>\<TargetDriverDllRegistry\>为烧录配置，因芯片型号而异外，其余配置对于STM32各型号是通用的。因此，可以保存MDK工程文件需修改的文本，简化一部分配置步骤。
+
+### EIDE项目配置文件分析
+
+在导入项目或创建项目后，EIDE在项目根目录生成.eide和.vscode文件夹
+
+在.eide/目录下，有：eide.json为项目配置文件，template.arm.options.v5.json，template.arm.options.v6.json和template.arm.options.gcc.json分别为ARMCC5，ARMCC6和GCC的编译配置文件
+
+在.vscode/目录下，有：launch.json为调试配置文件
+
+经测试，编译配置文件是通用的，而项目配置文件和调试配置文件均需要确定芯片型号，在图形界面配置。
+
+## 创建和维护快速开发模板的流程
+
+总结前面几节，我们可以得到创建和维护一个基于CubeMX的快速开发模板的流程：
+
+1.  **创建一个快速开发模板**
+
+    1.  **新建一个文件夹作为模板文件夹，根据需要修改其名称；**
+
+    2.  **配置CubeMX生成Makefile文件和MDK工程模板（参考方式1,3）；**
+
+    3.  **对于ARMCC工具链，导入MDK工程至EIDE，并创建EIDE项目模板（参考方式2）；**
+
+    4.  **对于GCC工具链，创建EIDE项目模板（参考方式3）；**
+
+2.  **配置各模板的其它选项**
+
+    1.  **修改编译输出目录；**
+
+    2.  **配置工程\\项目选项；**
+
+    3.  **配置EIDE项目调试选项；**
+
+    4.  **在模板文件夹创建VSCode工作区文件；**
+
+3.  **进行后续用户开发**
+
+    1.  **更新各模板的目录结构；**
+
+    2.  **上传模板至gitee/github，进行后续维护；**
+
+    3.  **从gitee/github拉取模板，作为一个新的git项目进行开发。**
+
+注：本教程中的配置方法特别是配置选项部分，很可能随MDK/EIDE的版本更新而变动，但是总体思路是可供参考的。在创建模板的阶段尽可能地使用图形界面进行配置，也是为了保证操作的兼容性；但是，难免需要对文件结构、配置文件进行分析，以使模板对称和简洁。现阶段来看难免步骤繁琐，还请耐心阅读——在没有自动化工具之前，创建多个型号的模板本就是一个工作量较大的工作。
 
 ## 创建一个快速开发模板
 
-### 新建一个文件夹作为工程目录/工作区
+### 创建模板文件夹
 
-略。
+新建一个文件夹作为模板文件夹，这里将命名统一为STM32xxx_HAL
 
-### 配置CubeMX生成Makefile文件
+![](media/acc8bceb29edede7cd3d5788d7faff4e.png)
 
-新建一个CubeMX工程，将工具链设置为Makefile，仅复制必要库文件，生成代码。
+打开CubeMX，配置芯片型号，保存至模板文件夹
 
-![](media/a9e8026c77a8c8604bf003c3c8633496.png)
+![](media/4cbe5943ea77c22bb9aff6107ca56af2.png)
+
+![](media/d22e8c2da09aa824df0b29e7efacd817.png)
+
+关闭CubeMX，将ioc文件修改为Template.ioc，然后再次打开CubeMX界面
+
+![](media/ae1a119a0c4ee2527c3379653925f651.png)
+
+将时钟树设置为高速时钟源采用外部晶振源，8Mhz，主频设置为最大，注意将锁相环输入切换到HSE
+
+![](media/b0d4cc0bf498cd77c3f059479f7e5483.png)
+
+![](media/a9d5eb75c661f950bc1d9ea923f616ac.png)
+
+### 配置CubeMX生成Makefile文件和MDK工程模板
+
+新建一个CubeMX工程，将工具链设置为Makefile，仅复制必要库文件，生成代码
+
+![](media/117aa5cf135061e8c7560bfa541aca3c.png)
 
 ![](media/18c9a4055b4444bf0c9ed09d47601142.png)
 
-### 配置CubeMX生成MDK工程
-
-将工具链设置为MDK-ARM，再次生成代码。
+将工具链设置为MDK-ARM，再次生成代码，然后关闭CubeMX
 
 ![](media/4b2bd09664aa125c012f555565441068.png)
 
 ### 整理文件夹
 
-生成代码完毕，得到文件夹如下。
+生成代码完毕，得到文件夹如下
 
-![](media/b1cb99ca2f74f52f685e115fd6b50b20.png)
+![](media/4ae335cc71327eebdc1bb6b96df2f27c.png)
 
-将Makefile文件移至文件夹内，与MDK-ARM文件夹相对称。
+删除.mxproject文件，将Makefile文件移至文件夹内，与MDK-ARM文件夹相**对称**
 
-![](media/3201c5d558d8eec176950cc605056213.png)
+![](media/79cb794d856530119ccee2e33d8e826e.png)
 
-### 由EIDE导入MDK工程，并创建基于ARMCC的EIDE项目
+### 由EIDE导入MDK工程，并创建使用ARMCC的EIDE项目
 
-打开VSCode，转到EIDE界面，导入生成的MDK工程。
+打开一个新的VSCode窗口，转到EIDE栏，导入前面生成的MDK工程
 
-![](media/dba8e7a2ee77dc76c6f6dace3b92f40f.png)
+![](media/2fba07cb5d1d0e80994cba2f53de9c8f.png)
 
-在关闭EIDE项目的前提下打开\\MDK-ARM\\eide.json，修改项目名称，目的是使项目名称具对称性，非必须。
+![](media/7b15c0ea410b4d28126a18f6003935b9.png)
 
-![](media/b3f409596b7ecef702da6c4e1b087038.png)
-![](media/d558d59b8a62babb97fbad0e112030e7.png)
+选择不切换到工作区
 
-![](media/c9090dce4a515964aa36baf39e3d6121.png)
-![](media/392567befc92d4a0944e663957958777.png)
+![](media/6731384515744407a0997db7000594b5.png)
 
-![](media/edc48e5f58b5addd13e912888cb2390c.png)
-![](media/27053449d3c3def4adf3b7833c3fc256.png)
+### 创建使用GCC的EIDE项目
 
-### 创建基于GCC的EIDE项目
+新建一个Cortex-M项目
 
-打开EIDE界面，新建一个Cortex-M项目
-
-![](media/b1b872e62536f63fe6dd1c8942ea989f.png)
+![](media/d58234651e27d9d186404110c575d7e5.png)
 
 ![](media/7ef7cd62f1c028c18ebf1a968536f1d9.png)
 
 ![](media/5f8e2aa76881bffa0c4e7b965d3f3e71.png)
 
-![](media/2a63e51ebb11d81883c6e04aa9d9645f.png)
+![](media/e2c7cb93235c5b385a4de92629f7d648.png)
 
-添加源文件夹Core和Drivers
+![](media/e2c330ffe881455e5a1f1fdb17d39a15.png)
 
-![](media/c3526892c401689665feed96970b824b.png)
+选择不切换到工作区
 
+![](media/6731384515744407a0997db7000594b5.png)
+
+切到\\Makefile，删除src文件夹
+
+![](media/7771b770257a0fc75b29e190fc02bd4c.png)
+
+### 在模板文件夹创建VSCode工作区文件
+
+打开一个新的VSCode窗口，将模板文件夹添加到工作区。
+
+![](media/1a869a29433818af95456011b573f6a4.png)
+
+![](media/29afd107f3d6b5e69f7c15a6e5979c3c.png)
+
+将MDK-ARM和Makefile文件夹添加到工作区，修改名称
+
+![](media/6704e1a4435df211659c00f98f146e7a.png)
+
+![](media/c997310ce65b4501081214f626dfedc3.png)
+
+将VSCode工作区文件保存到模板文件夹
+
+![](media/71d18fe3274307b23f05a8b89629b6a8.png)
+
+![](media/624f0e28eab6c9e907b7df53e9f2d241.png)
+
+打开工作区文件，添加名称项并修改
+
+![](media/54223217ba12bbbdf5a07d92c4ec047c.png)
+
+也可以直接新建一个txt文件，修改文件名及后缀为Template.code-workspace，并直接添加目录配置
+
+```json
+{
+    "folders": [
+        {
+            "name": " STM32xxx_HAL",
+            "path": "."
+        },
+        {
+            "name": "STM32xxx_HAL_ARMCC",
+            "path": "MDK-ARM"
+        },
+        {
+            "name": "STM32xxx_HAL_GCC",
+            "path": "Makefile"
+        }
+    ]
+}
+```
+
+### 继续配置使用GCC的EIDE项目
+
+添加Core和Drivers文件夹为**源文件夹**
+
+![](media/23414afa0c2e947a999af73544102979.png)
 ![](media/0867737fbe23b4c3907b66ba7c39724f.png)
 
-![](media/59011f71487c3dd0c6cccd84220c8079.png)
+![](media/875123a93e6a8ba01990ad23b1e16489.png)
 
-由于我们为保持对称性，将Makefile文件移至工程子目录中，此时提示待添加文件夹位于目录上级，不允许添加
+*注：在eide v3.0更新后取消了这一限制，可以跳过这一小部分*
+
+由于前面为保持对称性，将Makefile文件移至工程子目录中，这里会提示待添加文件夹位于目录上级，不允许添加
 
 ![](media/e5fbfa758bdf1be1bca90e5449bd2fd9.png)
 
-直接修改json文件
+直接修改eide.json
 
-![](media/9b2d13213ec0c58cee800687598084b7.png)
-![](media/3d84611619bdb1a616bb87f46af2da4c.png)
+![](media/9b2d13213ec0c58cee800687598084b7.png) ---> ![](media/3d84611619bdb1a616bb87f46af2da4c.png)
 
-![](media/737c809596a394198d896be743211bfe.png)
-![](media/c8a933977cf3476f69690349b380948e.png)
+添加.s引导文件到**虚拟文件夹**Application\\Makefile目录下
 
-可以看到文件夹已经添加成功，添加对应GCC工具链的引导文件，链接脚本和预处理器定义
+![](media/d97efdfae57e28c6b75cca29330befaa.png)
+![](media/0bf07c85cbac199d3777a60f27513a16.png)
+![](media/dea38d4e74c049f81ea7446da0db0e97.png)
 
-![](media/0df876376e848190b6158d50d3e3bcc7.png)
-![](media/9cc263155350e6f0873aedd936fa85e4.png)
+![](media/1c0a896fa24cbb14fd6c591fbe71397a.png)
+![](media/550927dc76fa2d58e54cba9c556582f2.png)
 
-![](media/5ef2ff1f5fdf52a6f2bb6ca2c78f444c.png)
+![](media/3ff7b06dce66ac5628b0461070e009e7.png)
+![](media/16de8a8aa745822c520dac982dde2e3e.png)
 
-至此，一个包含GCC和ARMCC编译工具链，以CubeMX为核心的快速开发工程模板初步完成。
+可以看到文件夹已经添加成功，添加链接脚本和预处理器定义。添加了多根文件夹的好处就体现出来了：宏定义可以从MDK-ARM处获得参考
 
-![](media/51942ac7406bf3fec868a5a1513cdf45.png)
+![](media/8dd59ba7430de587f053c04b31214f8b.png)
+![](media/57cb6b61deab03a489ba0f6e9d2af810.png)
 
-![](media/e8109a4655cc4b69cd5e2f3818482946.png)
+选择关闭工作区，删除模板文件夹的.eide文件夹，及\\MDK-ARM的.cmsis文件夹
 
-![](media/d4c04033a27ded0a263bf4a6f10e0b2d.png)
+*\*在EIDE从MDK导入工程时，会生成一个.cmsis文件夹，占用工程模板的大部分空间，此文件夹似乎是对使用CMSIS的工程自动生成的，在创建模板/推送版本时应予以排除。*
 
-\*在EIDE从MDK导入工程时，会生成一个.cmsis文件夹，占用工程模板90%以上的空间，笔者尚未确定此文件夹的用途，并且希望能删除此文件夹，请指教。
+![](media/29ae25e190770f510fd07b358a8010eb.png)
 
-## 配置各个工程/项目的其它选项
+### 至此，快速开发模板初步完成
 
-### 修改编译输出目录
+可以看到各文件夹结构如下，其中MDK工程在\\MDK-ARM下，使用ARMCC工具链进行编译和调试(\*对于MDK
+GCC工具链的支持还有点探究)；在\\MDK-ARM下的EIDE项目使用MDK工具链，在\\Makefile下的EIDE项目则使用GCC工具链。*受工具链限制，EIDE项目无法进行ARMCC调试(详见第六节配置EIDE调试选项)。*
 
-修改MDK工程选项，和两个EIDE项目的.eide/eide.json文件，将输出目录设置到上级
+![](media/8afc7a7cd983d0cfadb6007aa588406b.png)
 
-![](media/e5de5c7096bc91752f1d4aa942e37f53.png)
+![](media/e9aff9a6817f1b8460ab4eb00066462b.png)
 
-![](media/e0f71e3a6c385a5a8583f46545af0d75.png)
+![](media/7b14bf858649b7709f0836d22b0cffbf.png)
 
-得到build文件夹效果如下
+压缩模板文件夹，以防后续配置步骤中误操作
 
-![](media/ae85ae2a7752fee9cc42e816308fbd1d.png)
+![](media/07b43d07a671effdbc97e6985aeacc4c.png)
 
-### 配置工程\\项目选项
+## 配置各模板的其它选项
 
-编译规范统一设置为Obalanced/Og，gnu99，C++14；下载工具配置为DAPLink。
+### 创建编译文件的输出目录
 
-![](media/319123293dee155daa35bc7cc6a17f4a.png)
+在模板文件夹新建一个文件夹，重命名为build，在build文件夹下新建子文件夹MDK-ARM和Makefile
 
-![](media/6d23fbe56a65f3b3063a90eaf806fb9b.png)
+![](media/d860ac266acebee9b68394a3f43d6ee3.png)
 
-![](media/e3e7265213658b1f3c589595fff02c64.png)
+### 配置MDK工程的编译选项，烧录配置和输出目录
 
-![](media/d15410ee90b08d876369f0f3f3de4ad8.png)
+打开MDK，点击![](media/450a8e5955e0a14db1dbd146c04ed234.png)Options for
+Target，将编译选项统一设置为Obalanced，gnu99，C++11
 
-![](media/6d3cc4feb72053e2d58fa798167ee370.png)
+![](media/5cca9d6e318c089d010e01e277b64dd0.png)
 
-![](media/147b3ff20565c131eb99623ca42991fe.png)
-![](media/40abea50942379f9e037b50bd5d35262.png)
+![](media/55a77c702ad332e17fa4ba061b3c150d.png)
 
-![](media/14ba916bb5d6b681b702b710febbf868.png)![](media/13030c9c385d2143fa33e1efc6c6fc5c.png)
+对于烧录配置，先切换至ULINK2/ME Cortex Debugger，设置Trace - Core
+Clock为最大主频，勾选Flash Download - Reset and Run，取消勾选Debug Description -
+Enable
 
-![](media/e465383ce1e14b9f29589d98e14ec90f.png)
+![](media/1c7032bee3f8a644f0b21b30b1bd1fb0.png)
 
-### 配置EIDE调试选项
+![](media/f12fc35a6c00bae8895113be3d1bee68.png)
 
-配置EIDE调试文件，位于”\\.vscode\\launch.json”目录下。需要注意的是，ARMCC编译生成的.axf文件不被Cortex-Debug插件支持。当使用EIDE编译时，可在插件设置中勾选”尝试将axf转换为elf文件”选项。
+![](media/8a546d30581d8a727ad25773e4a5328a.png)
 
-![](media/fcadab534db206dc398b76a985c79934.png)
+![](media/c7a8bbfccaf7e31e7058b3dbcb51ba5b.png)
+
+对最顶上一个烧录器的配置会同步给其他烧录器，这里再将烧录器设置为Daplink
+
+![](media/edd9e42dad00019564ce6773f5f2acca.png)
+
+将输出目录设置到..\\build\\MDK-ARM\\Template，输出名为MDK-ARM
+
+![](media/ac1131ee37d7fdfaf06b85db9872b5e5.png)
+
+![](media/03fe54890f8343ea1ee95637d883dc55.png)
+
+### 从MDK工程文件提取配置
+
+关闭MDK工程，将模板文件夹重命名为STM32xxx_HAL_，解压一份之前打包好的模板文件
+
+![](media/76b51acad974eaac1df8fc798fa2e158.png)
+
+对两文件夹中的.uvprojx和.uvoptx文件进行文本比对，可以得到修改的配置对应的标签语句（省略号表示在文本的两个标签之间存在其他标签，仅用于方便检索，实际不存在）
+
+```xml
+Template.uvprotx: 
+<Project>
+  ...
+  <Targets>
+    <Target>
+      ...
+      <uAC6>1</uAC6>
+      <TargetOption>
+        <TargetCommonOption>
+          ...
+          <OutputDirectory>..\build\MDK-ARM\Template\</OutputDirectory>
+          <OutputName>MDK-ARM</OutputName>
+          ...
+          <ListingPath>..\build\MDK-ARM\Template\</ListingPath>
+          ...
+        </TargetCommonOption>
+        ...
+        <TargetArmAds>
+          <ArmAdsMisc>
+          ...
+            <useUlib>1</useUlib>
+          ...
+          </ArmAdsMisc>
+          <Cads>
+            <interw>1</interw>
+            <Optim>6</Optim>
+            <oTime>0</oTime>
+            <SplitLS>0</SplitLS>
+            <OneElfS>1</OneElfS>
+            <Strict>0</Strict>
+            <EnumInt>0</EnumInt>
+            <PlainCh>0</PlainCh>
+            <Ropi>0</Ropi>
+            <Rwpi>0</Rwpi>
+            <wLevel>3</wLevel>
+            <uThumb>0</uThumb>
+            <uSurpInc>0</uSurpInc>
+            <uC99>1</uC99>
+            <uGnu>1</uGnu>
+            <useXO>0</useXO>
+            <v6Lang>4</v6Lang>
+            <v6LangP>3</v6LangP>
+            <vShortEn>1</vShortEn>
+            <vShortWch>1</vShortWch>
+            <v6Lto>1</v6Lto>
+            <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
+            ...
+
+Template.uvoptx: 
+<ProjectOpt>
+    ...
+    <Target>
+...
+        <TargetOption>
+        ...
+            <OPTLEX>
+                ...
+                <ListingPath>..\build\MDK-ARM\Template\</ListingPath>
+            </OPTLEX>
+        ...
+            <DebugOpt>
+                ...
+                <nTsel>3</nTsel>
+                ...
+                <pMon>BIN\CMSIS_AGDI.dll</pMon>
+            </DebugOpt>
+            <TargetDriverDllRegistry>
+                <SetRegEntry>
+                    <Number>0</Number>
+                    <Key>UL2CM3</Key>
+                    <Name>-U -O206 -S0 -C0 -P00 -TO65554 -TC84000000 -TT84000000 -TP21 -TDS8047 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC1000 -FN1 -FF0STM32F4xx_384.FLM -FS08000000 -FL060000 -FP0($$Device:STM32F401CDUx$CMSIS\Flash\STM32F4xx_384.FLM)</Name>
+                </SetRegEntry>
+            </TargetDriverDllRegistry>
+            ...
+            <DebugDescription>
+                <Enable>0</Enable>
+                <EnableFlashSeq>1</EnableFlashSeq>
+                <EnableLog>0</EnableLog>
+                <Protocol>2</Protocol>
+                <DbgClock>10000000</DbgClock>
+            </DebugDescription>
+        </TargetOption>
+    </Target>
+    ...
+```
+
+除标签\<TargetDriverDllRegistry\>为烧录配置，因STM32芯片型号而异外，其他工程配置都是相通的，可以将配置复制到一个临时文本中，进行文本对比，这样能很快找到待修改部分的位置：
+
+![](media/9bba766b817f4e7842f9bd2a67335528.png)
+
+修改完毕后，将STM32xxx_HAL文件夹覆盖压缩至原压缩包
+
+### 配置EIDE项目的编译选项，烧录配置，输出目录和调试选项
+
+打开Template.code-workspace，配置EIDE项目如下
+
+![](media/ffd145964199d91b1c9b11d5f4d0f3ad.png)
+
+![](media/6ff4d5710a3fbd8071feed5d7c4c0564.png)
+
+关闭工作区，打开\\MDK-ARM和\\Makefile目录下的eide.json，按下shift+ctrl+f格式化json文件，将输出目录设置为..\\build\\MDK-ARM和..\\build\\Makefile；清空miscInfo和targets项；打开\\Makefile目录下的eide.json，将全文中Debug替换为Template，debug替换为template
+
+```json
+\MDK-ARM\.eide\eide.json
+"outDir": "..\\build\\MDK-ARM",
+    "miscInfo": {},
+    "targets": {},
+    
+\Makefile\.eide\eide.json
+    "mode": "Template",
+"outDir": "..\\build\\Makefile",
+        "STLink": {
+            "optionBytes": ".eide/template.st.option.bytes.ini",
+        },
+        "pyOCD": {
+            "config": ".eide/template.pyocd.yaml"
+        },
+    "miscInfo": {},
+    "targets": {},
+```
+
+将debug.arm.options.gcc.json重命名为template.arm.options.gcc.json。得到template.arm.options.v5.json，template.arm.options.v6.json和template.arm.options.gcc.json如下，编译配置在后续创建模板时可直接复用。
+
+```json
+\MDK-ARM\.eide\template.arm.options.v5.json
+{
+    "version": 4,
+    "beforeBuildTasks": [],
+    "afterBuildTasks": [],
+    "global": {
+        "use-microLIB": true,
+        "output-debug-info": "enable"
+    },
+    "c/cpp-compiler": {
+        "optimization": "level-1",
+        "one-elf-section-per-function": true,
+        "c99-mode": true,
+        "C_FLAGS": "--diag_suppress=1 --diag_suppress=1295",
+        "CXX_FLAGS": "--diag_suppress=1 --diag_suppress=1295",
+        "gnu-extensions": true,
+        "warnings": "unspecified"
+    },
+    "asm-compiler": {},
+    "linker": {
+        "output-format": "elf"
+    }
+}
+
+\MDK-ARM\.eide\template.arm.options.v6.json
+{
+    "version": 3,
+    "beforeBuildTasks": [],
+    "afterBuildTasks": [],
+    "global": {
+        "use-microLIB": true,
+        "output-debug-info": "enable"
+    },
+    "c/cpp-compiler": {
+        "optimization": "level-balanced",
+        "language-c": "gnu99",
+        "language-cpp": "c++11",
+        "link-time-optimization": true,
+        "one-elf-section-per-function": true,
+        "warnings": "ac5-like-warnings",
+        "short-enums#wchar": true
+    },
+    "asm-compiler": {
+        "$use": "asm"
+    },
+    "linker": {
+        "output-format": "elf",
+        "misc-controls": "--diag_suppress=L6329"
+    }
+}
+
+\Makefile\.eide\template.arm.options.gcc.json
+{
+    "version": 4,
+    "beforeBuildTasks": [],
+    "afterBuildTasks": [],
+    "global": {
+        "$float-abi-type": "hard",
+        "output-debug-info": "enable"
+    },
+    "c/cpp-compiler": {
+        "language-c": "gnu99",
+        "language-cpp": "c++11",
+        "optimization": "level-debug",
+        "warnings": "all-warnings",
+        "one-elf-section-per-function": true,
+        "one-elf-section-per-data": true
+    },
+    "asm-compiler": {},
+    "linker": {
+        "output-format": "elf",
+        "remove-unused-input-sections": true,
+        "LD_FLAGS": "--specs=nosys.specs --specs=nano.specs",
+        "LIB_FLAGS": "-lm"
+    }
+}
+```
+
+打开\\MDK-ARM和\\Makefile目录下的launch.json，配置EIDE调试文件如下
+
+![](media/c431122f9cb5e9f197e2a276244448ae.png)
+
+调试配置在复用时需要修改Daplink的“device“选项
+
+```json
+\MDK-ARM\.vscode\launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "pyocd",
+            "servertype": "pyocd",
+            "executable": "..\\build\\MDK-ARM\\Template\\MDK-ARM.elf",
+            "runToEntryPoint": "main",
+            "targetId": "cortex_m",
+            "cmsisPack": "<CMSIS-Pack-Path>"
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "openocd",
+            "servertype": "openocd",
+            "executable": "..\\build\\MDK-ARM\\Template\\MDK-ARM.elf",
+            "runToEntryPoint": "main",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+            ]
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "stlink",
+            "servertype": "stlink",
+            "executable": "..\\build\\MDK-ARM\\Template\\MDK-ARM.elf",
+            "runToEntryPoint": "main"
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "jlink",
+            "servertype": "jlink",
+            "executable": "..\\build\\MDK-ARM\\Template\\MDK-ARM.elf",
+            "runToEntryPoint": "main",
+            "interface": "swd",
+            "device": "STM32F401CD"
+        }
+    ]
+}
+
+\Makefile\.vscode\launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "pyocd",
+            "servertype": "pyocd",
+            "executable": "..\\build\\Makefile\\Template\\Makefile.elf",
+            "runToEntryPoint": "main",
+            "targetId": "cortex_m",
+            "cmsisPack": "<CMSIS-Pack-Path>"
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "openocd",
+            "servertype": "openocd",
+            "executable": "..\\build\\Makefile\\Template\\Makefile.elf",
+            "runToEntryPoint": "main",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/stm32f4x.cfg"
+            ]
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "stlink",
+            "servertype": "stlink",
+            "executable": "..\\build\\Makefile\\Template\\Makefile.elf",
+            "runToEntryPoint": "main"
+        },
+        {
+            "cwd": "${workspaceRoot}",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "jlink",
+            "servertype": "jlink",
+            "executable": "..\\build\\Makefile\\Template\\Makefile.elf",
+            "runToEntryPoint": "main",
+            "interface": "swd",
+            "device": "STM32F401CD"
+        }
+    ]
+}
+```
+
+ARMCC工具链编译生成的文件不被Cortex-Debug插件支持。在使用VSCode进行调试时，应切换到EIDE的Makefile项目。在插件设置中勾选”尝试将axf转换为elf文件”选项有时是有效的
 
 ![](media/9c0da646ae9e48c3fcbd2bae8bf4919b.png)
 
-### 在文件夹创建VSCode工作区文件
+### 至此，快速开发模板配置完毕！
 
-在模板文件夹创建一个VSCode工作区文件，添加两个子目录。
+再次打开模板文件夹的VSCode工作区文件，可以看到调试界面和EIDE的界面如下。
 
-![](media/46d59fdef64f8d865ec501ed69cbf7f6.png)
+![](media/824a2bbf26d2d30b077a2bfe2c27170f.png)
+![](media/c68310ce83f6ef87a6f7efbfb756c433.png)
 
-重新打开文件夹后，可以看到调试界面和EIDE的界面如下
+如果不打算上云，将模板文件夹压缩保存至放模板的文件夹，开发时直接解压复制即可。
 
-![](media/70bc2c62c56d72fdc3041dd20c3ed645.png)
-![](media/edc3299e40ddf250be9f60e827e993d2.png)
+![](media/dd6a3b94c857817846cc51ffee8485e9.png)
 
-### 至此，工程模板配置完毕！
+## 进行后续用户开发
 
-将模板保存至模板文件夹，开发时直接复制出来即可。
+### 更新各模板的目录结构；
 
-### \*一个有待完善的部分
+### 上传模板至gitee/github，进行后续维护；
 
-前面我们提到为保证对称性，修改了EIDE项目的项目名称，这会影响后续开发时，使用方法2由EIDE从MDK导入工程，以更新目录的操作。
+### 从gitee/github拉取模板，作为一个新的git项目进行开发。
 
-![](media/3080386c071bebed2f74233e96e6e951.png)
+## 对MDK多工程多目标的大型模板与本快速开发模板兼容性探讨
 
-![](media/9a94b298f358f932983ee0cbb0825670.png)
-
-目前，我们给出的方法是在导入前，将eide.json文件备份，在导入完毕后，选取json文件的目录更新部分并复制回备份文件，再将备份文件覆盖回去。
-
-![](media/023af14f423ac6beec30f9c6742e1957.png)
-
-这个步骤确实繁琐而有失快速开发的本意，因此你可以选择不修改EIDE工程的命名，这样在导入项目时EIDE将不会覆盖原有的项目选项，而是只更新目录部分。后续笔者考虑了解并使用CubeMX的自定义模板功能，以期在生成代码的同时自动修改eide.json内的文件目录结构。
-
-## 对使用MDK多工程多目标的大型工程与本快速开发模板兼容性探讨
-
-我们知道，MDK有多工程多目标功能，VSCode的工作区也可层层包含，形成层次结构，下面讨论大型工程开发和使用CubeMX快速开发模板开发的兼容性。
+我们知道，MDK有多工程多目标功能，VSCode有Multi-root
+Workspaces，下面讨论大型工程开发和使用CubeMX快速开发模板开发的兼容性。
 
 ### 对多目标工程的探讨
 
@@ -268,12 +802,12 @@ MDK目录包含工程名，目标名，以及共享的文件目录。经过尝�
 
 ![](media/736221283c6ef75c38a921761ae0be60.png)
 
-这就与我们在大型工程开发时，创建多目标对应不同的编译选项，快速切换开发版本和发行版本的思路相冲突。
+这与我们在大型工程开发时，创建多目标对应不同的编译选项，快速切换开发版本和发行版本的思路略相冲突。
 
 ![](media/a2b177d7df6a63f358c8339f2a8b0ba5.png)
 ![](media/b9a6a308d4851f6a6a585992809ff596.png)
 
-可以将其它目标命名为同名带后缀的方式，约定不带后缀的配置为开发版本。
+可以采用将其它目标命名为同名带后缀的方式，约定不带后缀的配置为开发版本这样的方法。
 
 而对于同一款产品有高低配版本，想要将区别放在多目标中的开发场景，本快速开发方法也难以派上用场。
 
@@ -287,7 +821,7 @@ MDK目录包含工程名，目标名，以及共享的文件目录。经过尝�
 
 因此，除非型号相近的芯片有时可以通用代码，共用一个工程，否则不建议采用多目标的形式进行快速开发。
 
-对于EIDE而言，项目选项总是保存在项目文件夹的”/.eide/eide.json”中，一个项目对应一处配置。注意到在该选项文件中我们有target一项保留了导入的MDK工程选项，但是不能直接在EIDE项目选项中应用或切换。总的来说，EIDE目前也不支持类似多目标的概念。
+对于EIDE而言，项目选项总是保存在项目文件夹的eide.json中，一个项目对应一处配置。注意到在该选项文件中我们有target一项保留了导入的MDK工程选项，但是不能直接在EIDE项目选项中应用或切换。总的来说，EIDE目前也不支持类似多目标的概念。
 
 ### 对多工程工作空间的探讨
 
@@ -313,13 +847,13 @@ MDK目录包含工程名，目标名，以及共享的文件目录。经过尝�
 
 ![](media/ffa649dd0df2de77e60d5e2605488814.png)
 
-总结
+### 总结
 
 本快速开发模板开发与多目标开发是相冲突的，但是与多工程开发是兼容的。
 
 ## 结语
 
-本文围绕CubeMX，探讨了快速开发的方法。后续拟进一步探讨对不同型号stm32创建模板的共同点，在此基础上创建常见型号的stm32快速开发模板，并结合git将模板上传至gitee/github，以减少重复造轮子的工作，真正实现快速开发。
+本文基于CubeMX，探讨如何创建兼顾ARMCC和GCC工具链的快速开发模板。通过修改配置文件和将模板上云，可以批量地维护模板并拉取使用。最终，我们尽可能地减少重复造轮子的工作，真正实现快速开发。
 
 ## 参考链接
 
