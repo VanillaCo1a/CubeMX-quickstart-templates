@@ -1,0 +1,12 @@
+{
+    "folders": [
+		{
+			"name": "MDK-ARM",
+			"path": "MDK-ARM"
+		},
+		{
+			"name": "Makefile",
+			"path": "Makefile"
+		}
+	]
+}
