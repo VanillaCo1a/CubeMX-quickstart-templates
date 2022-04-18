@@ -1,11 +1,15 @@
 {
-    "folders": [
+	"folders": [
 		{
-			"name": "MDK-ARM",
+			"name": "STM32F407VGTx_HAL",
+			"path": "."
+		},
+		{
+			"name": "STM32F407VGTx_HAL_ARMCC",
 			"path": "MDK-ARM"
 		},
 		{
-			"name": "Makefile",
+			"name": "STM32F407VGTx_HAL_GCC",
 			"path": "Makefile"
 		}
 	]

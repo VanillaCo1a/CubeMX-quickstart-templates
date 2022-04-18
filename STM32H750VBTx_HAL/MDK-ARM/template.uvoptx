@@ -17,11 +17,11 @@
 		<dwHighDateTime>0</dwHighDateTime>
 	</DaveTm>
 	<Target>
-		<TargetName>Template</TargetName>
+		<TargetName>template</TargetName>
 		<ToolsetNumber>0x4</ToolsetNumber>
 		<ToolsetName>ARM-ADS</ToolsetName>
 		<TargetOption>
-			<CLKADS>25000000</CLKADS>
+			<CLKADS>8000000</CLKADS>
 			<OPTTT>
 				<gFlags>1</gFlags>
 				<BeepAtEnd>1</BeepAtEnd>
@@ -40,7 +40,7 @@
 				<PageWidth>79</PageWidth>
 				<PageLength>66</PageLength>
 				<TabStop>8</TabStop>
-				<ListingPath>..\build\MDK-ARM\Template\</ListingPath>
+				<ListingPath>..\build\MDK-ARM\template\</ListingPath>
 			</OPTLEX>
 			<ListingPage>
 				<CreateCListing>1</CreateCListing>
@@ -98,7 +98,7 @@
 				<bEvRecOn>1</bEvRecOn>
 				<bSchkAxf>0</bSchkAxf>
 				<bTchkAxf>0</bTchkAxf>
-				<nTsel>6</nTsel>
+				<nTsel>3</nTsel>
 				<sDll />
 				<sDllPa />
 				<sDlgDll />
@@ -109,18 +109,13 @@
 				<tDlgDll />
 				<tDlgPa />
 				<tIfile />
-				<pMon>STLink\ST-LINKIII-KEIL_SWO.dll</pMon>
+				<pMon>BIN\CMSIS_AGDI.dll</pMon>
 			</DebugOpt>
 			<TargetDriverDllRegistry>
 				<SetRegEntry>
 					<Number>0</Number>
-					<Key>ST-LINKIII-KEIL_SWO</Key>
-					<Name>-U-O142 -O2254 -S0 -C0 -N00("ARM CoreSight SW-DP") -D00(5BA02477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO7 -FD20000000 -FC1000 -FN1 -FF0STM32H7x_128k.FLM -FS08000000 -FL020000 -FP0($$Device:STM32H750VB$Flash\STM32H7x_128k.FLM)</Name>
-				</SetRegEntry>
-				<SetRegEntry>
-					<Number>0</Number>
-					<Key />
-					<Name />
+					<Key>UL2CM3</Key>
+					<Name>-U -O206 -S0 -C0 -P00 -TO65554 -TC480000000 -TT480000000 -TP21 -TDS807F -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC8000 -FN1 -FF0STM32H7x_128k.FLM -FS08000000 -FL020000 -FP0($$Device:STM32H750VBTx$CMSIS\Flash\STM32H7x_128k.FLM)</Name>
 				</SetRegEntry>
 			</TargetDriverDllRegistry>
 			<Breakpoint />
@@ -166,6 +161,13 @@
 			<pszMrulep />
 			<pSingCmdsp />
 			<pMultCmdsp />
+			<DebugDescription>
+				<Enable>0</Enable>
+				<EnableFlashSeq>1</EnableFlashSeq>
+				<EnableLog>0</EnableLog>
+				<Protocol>2</Protocol>
+				<DbgClock>10000000</DbgClock>
+			</DebugDescription>
 		</TargetOption>
 	</Target>
 </ProjectOpt>

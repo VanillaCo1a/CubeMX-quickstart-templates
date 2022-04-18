@@ -1,7 +1,7 @@
 {
     "name": "Makefile",
     "type": "ARM",
-    "mode": "Template",
+    "mode": "template",
     "toolchain": "GCC",
     "dependenceList": [
         {
@@ -10,6 +10,7 @@
                 {
                     "name": "default",
                     "incList": [
+                        "./.eide/deps",
                         "./.eide/deps"
                     ],
                     "libList": [],
@@ -30,106 +31,26 @@
         "storageLayout": {
             "RAM": [
                 {
-                    "tag": "RAM",
-                    "id": 1,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
-                {
-                    "tag": "RAM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
-                {
-                    "tag": "RAM",
-                    "id": 3,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
-                {
                     "tag": "IRAM",
                     "id": 1,
                     "mem": {
                         "startAddr": "0x20000000",
-                        "size": "0x10000"
+                        "size": "0x5000"
                     },
                     "isChecked": true,
-                    "noInit": false
-                },
-                {
-                    "tag": "IRAM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
                     "noInit": false
                 }
             ],
             "ROM": [
                 {
-                    "tag": "ROM",
-                    "id": 1,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
-                    "tag": "ROM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
-                    "tag": "ROM",
-                    "id": 3,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
                     "tag": "IROM",
                     "id": 1,
                     "mem": {
                         "startAddr": "0x08000000",
-                        "size": "0x80000"
+                        "size": "0x10000"
                     },
                     "isChecked": true,
                     "isStartup": true
-                },
-                {
-                    "tag": "IROM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": true,
-                    "isStartup": false
                 }
             ]
         },
@@ -172,47 +93,7 @@
         "interface": "cmsis-dap",
         "baseAddr": "0x08000000"
     },
-    "uploadConfigMap": {
-        "JLink": {
-            "bin": "",
-            "baseAddr": "0x08000000",
-            "cpuInfo": {
-                "vendor": "ST",
-                "cpuName": "STM32F103ZE"
-            },
-            "proType": 1,
-            "speed": 8000,
-            "otherCmds": ""
-        },
-        "STLink": {
-            "bin": "",
-            "proType": "SWD",
-            "resetMode": "default",
-            "runAfterProgram": true,
-            "speed": 4000,
-            "address": "0x08000000",
-            "elFile": "None",
-            "optionBytes": ".eide/template.st.option.bytes.ini",
-            "otherCmds": ""
-        },
-        "pyOCD": {
-            "bin": "",
-            "targetName": "cortex_m",
-            "baseAddr": "0x08000000",
-            "speed": "4M",
-            "config": ".eide/template.pyocd.yaml"
-        },
-        "OpenOCD": {
-            "bin": "",
-            "target": "stm32f1x",
-            "interface": "cmsis-dap",
-            "baseAddr": "0x08000000"
-        },
-        "Custom": {
-            "bin": "",
-            "commandLine": "null"
-        }
-    },
+    "uploadConfigMap": {},
     "miscInfo": {},
     "targets": {},
     "version": "3.0"

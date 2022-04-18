@@ -1,7 +1,7 @@
 {
     "name": "Makefile",
     "type": "ARM",
-    "mode": "Template",
+    "mode": "template",
     "toolchain": "GCC",
     "dependenceList": [
         {
@@ -10,7 +10,8 @@
                 {
                     "name": "default",
                     "incList": [
-                        ".\\.eide\\deps"
+                        "./.eide/deps",
+                        "./.eide/deps"
                     ],
                     "libList": [],
                     "sourceDirList": [],
@@ -26,55 +27,15 @@
         "cpuType": "Cortex-M4",
         "floatingPointHardware": "single",
         "useCustomScatterFile": false,
-        "scatterFilePath": ".\\STM32F407VGTx_FLASH.ld",
+        "scatterFilePath": "STM32F407VGTx_FLASH.ld",
         "storageLayout": {
             "RAM": [
-                {
-                    "tag": "RAM",
-                    "id": 1,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
-                {
-                    "tag": "RAM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
-                {
-                    "tag": "RAM",
-                    "id": 3,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "noInit": false
-                },
                 {
                     "tag": "IRAM",
                     "id": 1,
                     "mem": {
                         "startAddr": "0x20000000",
-                        "size": "0x1C000"
-                    },
-                    "isChecked": true,
-                    "noInit": false
-                },
-                {
-                    "tag": "IRAM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "0x2001C000",
-                        "size": "0x04000"
+                        "size": "0x5000"
                     },
                     "isChecked": true,
                     "noInit": false
@@ -82,54 +43,14 @@
             ],
             "ROM": [
                 {
-                    "tag": "ROM",
-                    "id": 1,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
-                    "tag": "ROM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
-                    "tag": "ROM",
-                    "id": 3,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
-                },
-                {
                     "tag": "IROM",
                     "id": 1,
                     "mem": {
                         "startAddr": "0x08000000",
-                        "size": "0x100000"
+                        "size": "0x10000"
                     },
                     "isChecked": true,
                     "isStartup": true
-                },
-                {
-                    "tag": "IROM",
-                    "id": 2,
-                    "mem": {
-                        "startAddr": "",
-                        "size": ""
-                    },
-                    "isChecked": false,
-                    "isStartup": false
                 }
             ]
         },
@@ -137,9 +58,9 @@
     },
     "uploader": "OpenOCD",
     "srcDirs": [
-        ".\\.eide\\deps",
-        ".\\..\\Core",
-        ".\\..\\Drivers"
+        "./.eide/deps",
+        "./../Core",
+        "./../Drivers"
     ],
     "virtualFolder": {
         "name": "<virtual_root>",
@@ -153,7 +74,7 @@
                         "name": "Makefile",
                         "files": [
                             {
-                                "path": ".\\startup_stm32f407xx.s"
+                                "path": "startup_stm32f407xx.s"
                             }
                         ],
                         "folders": []
@@ -172,48 +93,8 @@
         "interface": "cmsis-dap",
         "baseAddr": "0x08000000"
     },
-    "uploadConfigMap": {
-        "JLink": {
-            "bin": "",
-            "baseAddr": "0x08000000",
-            "cpuInfo": {
-                "vendor": "ST",
-                "cpuName": "STM32F407VG"
-            },
-            "proType": 1,
-            "speed": 8000,
-            "otherCmds": ""
-        },
-        "STLink": {
-            "bin": "",
-            "proType": "SWD",
-            "resetMode": "default",
-            "runAfterProgram": true,
-            "speed": 4000,
-            "address": "0x08000000",
-            "elFile": "None",
-            "optionBytes": ".eide/gcc.st.option.bytes.ini",
-            "otherCmds": ""
-        },
-        "pyOCD": {
-            "bin": "",
-            "targetName": "cortex_m",
-            "baseAddr": "0x08000000",
-            "speed": "4M",
-            "config": ".eide/gcc.pyocd.yaml"
-        },
-        "OpenOCD": {
-            "bin": "",
-            "target": "stm32f4x",
-            "interface": "cmsis-dap",
-            "baseAddr": "0x08000000"
-        },
-        "Custom": {
-            "bin": "",
-            "commandLine": "null"
-        }
-    },
+    "uploadConfigMap": {},
     "miscInfo": {},
     "targets": {},
-    "version": "2.16"
+    "version": "3.0"
 }
